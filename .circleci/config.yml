@@ -14,7 +14,7 @@ jobs:
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
-      - run: pip install pylint
+      - run: sudo pip install pylint
       - run:
           command: |
             pipenv run "python pylint_md.py -l ~/circleci-pylint_md -o ~/circleci-pylint_md/results.md"
