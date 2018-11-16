@@ -18,7 +18,7 @@ def pylint_markdown(location, output_path):
     analysisfiles = glob.glob(location +'/**/*.py', recursive=True)
     filecount = len(analysisfiles)
 
-    print('Analysis of {} file(s)'.format(filecount))
+    print('Performing analysis of {} file(s)'.format(filecount))
 
     markdown_files = list()
     for filepath in glob.glob(location +'/**/*.py', recursive=True):
