@@ -14,10 +14,6 @@ jobs:
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
-      - run:
-          command: |
-            sudo pip install pipenv
-            pipenv install
       - run: pip install pylint
       - run:
           command: |
