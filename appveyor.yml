@@ -1,0 +1,56 @@
+environment:
+
+  matrix:
+
+    # For Python versions available on Appveyor, see
+    # http://www.appveyor.com/docs/installed-software#python
+    # The list here is complete (excluding Python 2.6, which
+    # isn't covered by this document) at the time of writing.
+
+      - PYTHON: C:\Python27
+        LANG: -DBUILD_PYTHON=ON
+        PYTHON_VERSION: 27
+      - PYTHON: C:\Python35
+        LANG: -DBUILD_PYTHON=ON
+        PYTHON_VERSION: 35
+      - PYTHON: C:\Python36
+        LANG: -DBUILD_PYTHON=ON
+        PYTHON_VERSION: 36
+      - PYTHON: C:\Python37
+        LANG: -DBUILD_PYTHON=ON
+        PYTHON_VERSION: 37
+
+install:
+  # We need wheel installed to build wheels
+  - IF DEFINED PYTHON (IF "%platform%" == "x64" SET PYTHON=%PYTHON%-x64)
+  - IF DEFINED PYTHON SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - IF DEFINED PYTHON pip install pylint
+
+build: off
+
+test_script:
+  # Put your test command here.
+  # If you don't need to build C extensions on 64-bit Python 3.3 or 3.4,
+  # you can remove "build.cmd" from the front of the command, as it's
+  # only needed to support those cases.
+  # Note that you must use the environment variable %PYTHON% to refer to
+  # the interpreter you're using - Appveyor does not do anything special
+  # to put the Python version you want to use on PATH.
+  - mkdir markdown
+  - "build.cmd %PYTHON%\\python.exe %APPVEYOR_BUILD_FOLDER%/pylint_md.py -l %APPVEYOR_BUILD_FOLDER% -o %APPVEYOR_BUILD_FOLDER%/markdown/report.md  "
+
+after_test:
+  # This step builds your wheels.
+  # Again, you only need build.cmd if you're building C extensions for
+  # 64-bit Python 3.3/3.4. And you need to use %PYTHON% to get the correct
+  # interpreter
+  - "build.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
+
+artifacts:
+  # bdist_wheel puts your built wheel in the dist directory
+  - path: markdown\*
+
+#on_success:
+#  You can use this step to upload your artifacts to a public website.
+#  See Appveyor's documentation for more details. Or you can simply
+#  access your wheels from the Appveyor "artifacts" tab for your build.
