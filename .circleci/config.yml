@@ -14,12 +14,11 @@ jobs:
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
-      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
       - run:
           command: |
             sudo pip install pipenv
             pipenv install
-            sudo pip install pylint
+      - run: pip install pylint
       - run:
           command: |
             pipenv run "python pylint_md.py -l ~/circleci-pylint_md -o ~/circleci-pylint_md/results.md"
