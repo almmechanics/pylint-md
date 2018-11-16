@@ -17,7 +17,7 @@ jobs:
       - run: sudo pip install pylint
       - run:
           command: |
-            pipenv run "python pylint_md.py -l ~/circleci-pylint_md -o ~/circleci-pylint_md/results.md"
+            pipenv run "python ~/circleci-pylint_md/pylint_md.py -l ~/circleci-pylint_md -o ~/circleci-pylint_md/results.md"
       - store_test_results:
           path: test-results
       - store_artifacts:
