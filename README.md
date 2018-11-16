@@ -1,6 +1,6 @@
 # pylint-md
 
-Generate a markdown reports from pylint analysis
+Generate markdown reports from pylint analysis
 
 ## Powershell implementation
 
