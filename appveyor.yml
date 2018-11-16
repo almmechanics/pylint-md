@@ -37,7 +37,7 @@ test_script:
   # the interpreter you're using - Appveyor does not do anything special
   # to put the Python version you want to use on PATH.
   - mkdir markdown
-  - %PYTHON%\\python.exe %APPVEYOR_BUILD_FOLDER%/pylint_md.py -l %APPVEYOR_BUILD_FOLDER% -o %APPVEYOR_BUILD_FOLDER%/markdown/report.md 
+  - "%PYTHON%\\python.exe %APPVEYOR_BUILD_FOLDER%/pylint_md.py -l %APPVEYOR_BUILD_FOLDER% -o %APPVEYOR_BUILD_FOLDER%/markdown/report.md"
 
 after_test: off
   # This step builds your wheels.
