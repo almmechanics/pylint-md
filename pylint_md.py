@@ -7,75 +7,108 @@ import sys
 import getopt
 from collections import Counter
 
-def pylint_markdown(root_path, output_path):
+def pylint_markdown(location, output_path):
     """Main conversion engine"""
 
+    totals = {'error': 0, 'warning': 0, 'refactor': 0, 'convention': 0}
+
+    markdown_summary = list()
+    markdown_summary.append('# Analysis of folder {}'.format(location))
+
+    analysisfiles = glob.glob(location +'/**/*.py', recursive=True)
+    filecount = len(analysisfiles)
+
+    print('Analysis of {} file(s)'.format(filecount))
+
+    markdown_files = list()
+    for filepath in glob.glob(location +'/**/*.py', recursive=True):
+        print('Processing file {}'.format(filepath))
+
+        markdown_files.append('## {}'.format(filepath))
+        markdown_files.append('### Summary')
+
+        json_counter = Counter()
+        lint_json = None
+
+        proc = subprocess.Popen("pylint "+ filepath + " -f json --persistent=n --score=y",
+                                stdout=subprocess.PIPE, shell=True)
+        (out, _err) = proc.communicate()
+        if out and  out.strip():
+            lint_json = json.loads(out)
+            json_counter = Counter(player['type'] for player in lint_json)
+
+        markdown_files.append('|Type|Number|')
+        markdown_files.append('|-|-|')
+        markdown_files.append('|error|{}|'.format(json_counter['error']))
+        markdown_files.append('|warning|{}|'.format(json_counter['warning']))
+        markdown_files.append('|refactor|{}|'.format(json_counter['refactor']))
+        markdown_files.append('|convention|{}|'.format(json_counter['convention']))
+
+        # Add to the counters
+        totals['error'] += json_counter['error']
+        totals['warning'] += json_counter['warning']
+        totals['refactor'] += json_counter['refactor']
+        totals['convention'] += json_counter['convention']
+
+        markdown_files.append('\n### Pylint messages\n')
+        if lint_json is not None:
+            for lint in lint_json:
+                markdown_files.append('* Line: {} is {}[{}] in {}.py\n'.format(
+                    lint['line'], lint['message'], lint['message-id'], lint['module']))
+        else:
+            markdown_files.append('* No issues found')
+
+        markdown_files.append('---')
+
+    # create summary
+
+    markdown_summary.append('|Item|Number|')
+    markdown_summary.append('|-|-|')
+    markdown_summary.append('|files processed|{}|'.format(filecount))
+    markdown_summary.append('|errors|{}|'.format(totals['error']))
+    markdown_summary.append('|warnings|{}|'.format(totals['warning']))
+    markdown_summary.append('|refactors|{}|'.format(totals['refactor']))
+    markdown_summary.append('|conventions|{}|'.format(totals['convention']))
+    markdown_summary.append('---')
+
+    print('errors={};warnings={};refactors={};conventions={}'.format(totals['error'],
+                                                                     totals['warning'],
+                                                                     totals['refactor'],
+                                                                     totals['convention']))
+
+    export_as_markdown(output_path, (markdown_summary + markdown_files))
+
+def export_as_markdown(output_path, markdown):
+    """Export the markdown content"""
+
+    print('Generating markdown file: {}'.format(output_path))
     with open(output_path, 'w') as out_file:
-
-        out_file.write('# Analysis of folder {}\n'.format(root_path))
-
-        analysisfiles = glob.iglob(root_path +'/**/*.py', recursive=True)
-
-        filecount = len(list(analysisfiles))
-        print('Analysis of {} file(s)'.format(filecount))
-        out_file.write('\n Analysis of {} file(s)\n'.format(filecount))
-
-        for filename in glob.iglob(root_path +'/**/*.py', recursive=True):
-            print("Processing file {}".format(filename))
-            out_file.write("\n## {}\n".format(filename))
-
-            out_file.write('\n### Summary\n')
-
-            json_counter = Counter()
-            lint_json = None
-
-            proc = subprocess.Popen("pylint "+ filename + " -f json --persistent=n --score=y",
-                                    stdout=subprocess.PIPE, shell=True)
-            (out, _err) = proc.communicate()
-            if out and  out.strip():
-                lint_json = json.loads(out)
-                json_counter = Counter(player['type'] for player in lint_json)
-
-            out_file.write('\n|Type|Number|\n')
-            out_file.write('|-|-|\n')
-            out_file.write('|error|{}|\n'.format(json_counter['error']))
-            out_file.write('|warning|{}|\n'.format(json_counter['warning']))
-            out_file.write('|refactor|{}|\n'.format(json_counter['refactor']))
-            out_file.write('|convention|{}|\n'.format(json_counter['convention']))
-
-            out_file.write('\n### Pylint messages\n\n')
-            if lint_json is not None:
-                for lint in lint_json:
-                    out_file.write('* Line: {} is {}[{}] in {}.py\n'.format(
-                        lint['line'], lint['message'], lint['message-id'], lint['module']))
-            else:
-                out_file.write('* No issues found\n')
-
-            out_file.write('\n---\n')
+        for row in markdown:
+            out_file.write(row+'\n')
 
 def main(argv):
     """Main function for pylint_md to process the file arguments """
 
-    root_path = None
+    location = None
     output_file = None
     try:
-        opts, _args = getopt.getopt(argv, "hr:o:", ["rroot_path=", "ooutput_file="])
+        opts, _args = getopt.getopt(argv, "hl:o:", ["rlocation=", "ooutput_file="])
     except getopt.GetoptError:
-        print('pylint_md.py -r <root_path> -o <output_file>')
+        print('pylint_md.py -l <location> -o <output_file>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('pylint_md -r <root_path> -o <output_file>')
+            print('pylint_md -l <location> -o <output_file>')
             sys.exit()
-        elif opt in ("-r", "--rroot_path"):
-            root_path = arg
+        elif opt in ("-l", "--llocation"):
+            location = arg
         elif opt in ("-o", "--oooutput_file"):
             output_file = arg
-    print('Root Path is {}'.format(root_path))
+    print('Location  is {}'.format(location))
     print('Output file is {}'.format(output_file))
 
-    if root_path is not None and output_file is not None:
-        pylint_markdown(root_path, output_file)
+    if location is not None and output_file is not None:
+        pylint_markdown(location, output_file)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
