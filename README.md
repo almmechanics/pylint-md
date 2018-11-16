@@ -13,3 +13,7 @@ Example usage
 Example usage
 
     pylint_md.py -l c:\dev\github\pylint-md -o c:\temp\t1.md
+
+# Build Status
+
+[![Build status](https://almmechanics.visualstudio.com/python/_apis/build/status/pylint_md-CI)](https://almmechanics.visualstudio.com/python/_build/latest?definitionId=-1)
