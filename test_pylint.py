@@ -9,7 +9,7 @@ LOCATION = '.'
 ANALYSIS_FILES = glob.glob(LOCATION +'/**/*.py', recursive=True)
 @pytest.mark.parametrize('filepath', ANALYSIS_FILES)
 
-def test_file_has_no_pylint_errors(filepath):
+def file_has_no_pylint_errors(filepath):
     """validate that there are zero pylint warnings against a python file"""
     print('creating tests for file {}'.format(filepath))
 
