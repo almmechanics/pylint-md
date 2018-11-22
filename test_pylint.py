@@ -24,9 +24,4 @@ def test_file_has_no_pylint_errors(filepath):
     if out and  out.strip():
         lint_json = json.loads(out)
 
-    if lint_json is not None:
-        for lint in lint_json:
-            warnings.warn('Line: {} is {}[{}] in {}.py\n'.format(
-                lint['line'], lint['message'], lint['message-id'], lint['module']))
-
     assert len(lint_json) == 0 
