@@ -1,27 +1,25 @@
-"""pylint dynamic pytest tool"""
+"""pylint dynamic pytest wrapper"""
 
 import glob
 import subprocess
 import json
-import sys
-import getopt
-from collections import Counter
 import pytest
-import warnings
 
-
-location = '.'
-analysisfiles = glob.glob(location +'/**/*.py', recursive=True)
-@pytest.mark.parametrize('filepath',analysisfiles )
+LOCATION = '.'
+ANALYSIS_FILES = glob.glob(LOCATION +'/**/*.py', recursive=True)
+@pytest.mark.parametrize('filepath', ANALYSIS_FILES)
 
 def test_file_has_no_pylint_errors(filepath):
+    """validate that there are zero pylint warnings against a python file"""
     print('creating tests for file {}'.format(filepath))
-    lint_json = []
 
     proc = subprocess.Popen("pylint "+ filepath + " -f json --persistent=n --score=y",
                             stdout=subprocess.PIPE, shell=True)
     (out, _err) = proc.communicate()
+
+    lint_json = []
     if out and  out.strip():
         lint_json = json.loads(out)
 
-    assert len(lint_json) == 0 
+    # pylint: disable=C1801
+    assert len(lint_json) == 0
